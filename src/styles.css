@@ -29,6 +29,8 @@
   background-color: white;
   width: 100%;
   animation: slide-up 0.2s ease;
+  border-radius: 20px 20px 0 0;
+  bottom: 0;
 }
 
 .sb-content.sb-is-snapping {
@@ -45,9 +47,11 @@
 }
 
 .sb-handle {
-  width: 60px;
-  height: 2px;
-  background-color: black;
-  text-align: center;
-  margin: auto;
+  width: 96px;
+  height: 4px;
+  background-color: rgba(0, 0, 0, 0.1);
+  position: absolute;
+  right: 50%;
+  transform: translateX(50%);
+  top: 8px;
 }

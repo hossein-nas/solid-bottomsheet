@@ -28,9 +28,14 @@ export interface SnapVariantProps extends BaseSolidBottomsheetProps {
 export type SolidBottomsheetProps = DefaultVariantProps | SnapVariantProps;
 
 export const SolidBottomsheet: Component<SolidBottomsheetProps> = (props) => {
+  const screenMaxHeight = window.visualViewport?.height ?? window.screen.height;
+
   const isSnapVariant = props.variant === "snap";
 
-  const [maxHeight, setMaxHeight] = createSignal(window.visualViewport.height);
+  let bodyRef: HTMLDivElement = null!;
+  let handleBarRef: HTMLDivElement = null!;
+
+  const [maxHeight, setMaxHeight] = createSignal(screenMaxHeight);
   const [isClosing, setIsClosing] = createSignal(false);
   const [isSnapping, setIsSnapping] = createSignal(false);
 
@@ -61,17 +66,44 @@ export const SolidBottomsheet: Component<SolidBottomsheetProps> = (props) => {
     createSignal(getDefaultTranslateValue());
 
   const onViewportChange = () => {
-    setMaxHeight(window.visualViewport.height);
+    const screenMaxHeight =
+      window.visualViewport?.height ?? window.screen.height;
+
+    const bodyHeight =
+      screenMaxHeight -
+      handleBarRef.getBoundingClientRect().height * 8 -
+      bottomsheetTranslateValue();
+
+    console.log({
+      visualViewport: window.visualViewport,
+      screen: window.screen,
+      screenMaxHeight,
+      handleBarHeight: handleBarRef?.getBoundingClientRect().height * 8,
+      bottomsheetTranslateValue: bottomsheetTranslateValue(),
+    });
+
+    bodyRef.style.setProperty("height", `${bodyHeight}px`);
+
+    setMaxHeight(screenMaxHeight);
+
+    if (
+      document.activeElement &&
+      document.activeElement instanceof HTMLElement
+    ) {
+      document.activeElement?.focus?.();
+    }
   };
 
   onMount(() => {
     document.body.classList.add("sb-overflow-hidden");
-    window.visualViewport.addEventListener("resize", onViewportChange);
-  });
 
-  onCleanup(() => {
-    document.body.classList.remove("sb-overflow-hidden");
-    window.visualViewport.removeEventListener("resize", onViewportChange);
+    window.addEventListener("resize", onViewportChange);
+
+    onCleanup(() => {
+      document.body.classList.remove("sb-overflow-hidden");
+      window.removeEventListener("resize", onViewportChange);
+    });
+    onViewportChange();
   });
 
   createEffect(() => {
@@ -179,6 +211,7 @@ export const SolidBottomsheet: Component<SolidBottomsheetProps> = (props) => {
           }}
           style={{
             transform: `translateY(${bottomsheetTranslateValue()}px)`,
+            "padding-bottom": `${bottomsheetTranslateValue()}px`,
             ...(isSnapVariant ? { height: `${maxHeight()}px` } : {}),
           }}
           {...(isClosing() ? { onAnimationEnd: props.onClose } : {})}
@@ -189,9 +222,9 @@ export const SolidBottomsheet: Component<SolidBottomsheetProps> = (props) => {
             onTouchMove={onTouchMove}
             onTouchEnd={onTouchEnd}
           >
-            <div class="sb-handle" />
+            <div class="sb-handle" ref={handleBarRef} />
           </div>
-          {props.children}
+          <div ref={bodyRef}>{props.children}</div>
         </div>
       </div>
     </Portal>
