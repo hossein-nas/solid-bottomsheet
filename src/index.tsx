@@ -99,9 +99,16 @@ export const SolidBottomsheet: Component<SolidBottomsheetProps> = (props) => {
 
     window.addEventListener("resize", onViewportChange);
 
+    if (window.visualViewport) {
+      window.visualViewport.addEventListener("resize", onViewportChange);
+    }
+
     onCleanup(() => {
       document.body.classList.remove("sb-overflow-hidden");
       window.removeEventListener("resize", onViewportChange);
+      if (window.visualViewport) {
+        window.visualViewport.removeEventListener("resize", onViewportChange);
+      }
     });
     onViewportChange();
   });

@@ -1,6 +1,6 @@
 {
   "name": "@hosseinnas/solid-bottom-sheet",
-  "version": "0.1.0",
+  "version": "0.1.1",
   "description": "A bottomsheet UI component for Solid JS",
   "scripts": {
     "build": "rollup -c",

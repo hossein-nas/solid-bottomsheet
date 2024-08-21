@@ -31,6 +31,7 @@
   animation: slide-up 0.2s ease;
   border-radius: 20px 20px 0 0;
   bottom: 0;
+  position: fixed;
 }
 
 .sb-content.sb-is-snapping {
