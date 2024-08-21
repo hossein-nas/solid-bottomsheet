@@ -13,6 +13,7 @@ const DEFAULT_THRESHOLD = 50;
 export interface BaseSolidBottomsheetProps {
   children: JSX.Element;
   onClose: () => void;
+  close: boolean;
 }
 
 export interface DefaultVariantProps extends BaseSolidBottomsheetProps {
@@ -105,6 +106,12 @@ export const SolidBottomsheet: Component<SolidBottomsheetProps> = (props) => {
 
   createEffect(() => {
     snapPoints = getSnapPoints(maxHeight());
+  });
+
+  createEffect(() => {
+    if (props.close) {
+      setIsClosing(true);
+    }
   });
 
   let snapPoints: number[] = [];
