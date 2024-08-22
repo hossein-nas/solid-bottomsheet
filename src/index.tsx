@@ -29,6 +29,9 @@ export interface SnapVariantProps extends BaseSolidBottomsheetProps {
 export type SolidBottomsheetProps = DefaultVariantProps | SnapVariantProps;
 
 export const SolidBottomsheet: Component<SolidBottomsheetProps> = (props) => {
+  const [scrollPosition, setScrollPosition] = createSignal(
+    window.pageYOffset || document.documentElement.scrollTop
+  );
   const screenMaxHeight = window.visualViewport?.height ?? window.screen.height;
 
   const isSnapVariant = props.variant === "snap";
@@ -67,6 +70,7 @@ export const SolidBottomsheet: Component<SolidBottomsheetProps> = (props) => {
     createSignal(getDefaultTranslateValue());
 
   const onViewportChange = () => {
+    setScrollPosition(window.pageYOffset || document.documentElement.scrollTop);
     const screenMaxHeight =
       window.visualViewport?.height ?? window.screen.height;
 
@@ -95,11 +99,32 @@ export const SolidBottomsheet: Component<SolidBottomsheetProps> = (props) => {
     }
   };
 
+  const freezeBody = () => {
+    // Save the current scroll position
+
+    // Add a fixed position to prevent jumping
+    document.body.style.position = "fixed";
+    document.body.style.top = `-${scrollPosition()}px`;
+    document.body.style.width = "100%";
+  };
+
+  const releaseBody = () => {
+    // Remove the fixed position and restore the scroll position
+    document.body.style.position = "";
+    document.body.style.top = "";
+    document.body.style.width = "";
+
+    // Restore the scroll position
+    window.scrollTo(0, scrollPosition());
+  };
+
   onMount(() => {
     document.body.classList.add("sb-overflow-hidden");
+    freezeBody();
 
     onCleanup(() => {
       document.body.classList.remove("sb-overflow-hidden");
+      releaseBody();
     });
     onViewportChange();
   });
@@ -204,6 +229,11 @@ export const SolidBottomsheet: Component<SolidBottomsheetProps> = (props) => {
     }
   };
 
+  const handleClose = () => {
+    props.onClose();
+    releaseBody();
+  };
+
   return (
     <Portal>
       <div class="sb-overlay" onClick={onOverlayClick}>
@@ -218,7 +248,7 @@ export const SolidBottomsheet: Component<SolidBottomsheetProps> = (props) => {
             "padding-bottom": `${bottomsheetTranslateValue()}px`,
             ...(isSnapVariant ? { height: `${maxHeight()}px` } : {}),
           }}
-          {...(isClosing() ? { onAnimationEnd: props.onClose } : {})}
+          {...(isClosing() ? { onAnimationEnd: handleClose } : {})}
         >
           <div
             class="sb-handle-container"
